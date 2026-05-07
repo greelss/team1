@@ -52,9 +52,9 @@ pipeline {
                 sshPublisher(publishers: [
                     sshPublisherDesc(configName: 'target', transfers: [
                         sshTransfer(execCommand: '''
-                        export KUBECONFIG=$HOME/.kube/config
-                        kubectl set image deployment/spring-petclinic spring-petclinic=hshs99/spring-petclinic:latest
-                        kubectl rollout status deployment/spring-petclinic
+                            export KUBECONFIG=/home/k8s-master/.kube/config
+                            kubectl set image deployment/team1-deployment spring-petclinic=hshs99/spring-petclinic:latest
+                            kubectl rollout status deployment/team1-deployment
                         ''')
                     ])
                 ])
