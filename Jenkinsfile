@@ -8,7 +8,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE_NAME = "spring-petclinic"
-        DOCKERHUB_CRED = credentials('dockerCredentials')
+        DOCKERHUB_CRED = credentials('hshs99')
         DOCKER_API_VERSION = '1.43'
         COMPOSE_API_VERSION = '1.43'
         // S3를 위한 변수 (필요시 추가)
@@ -33,9 +33,9 @@ pipeline {
             steps {
                 sh '''
                 docker build -t ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER} .
-                docker tag ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER} greelss/${DOCKER_IMAGE_NAME}:latest
+                docker tag ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER} hshs99/${DOCKER_IMAGE_NAME}:latest
                 echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin
-                docker push greelss/${DOCKER_IMAGE_NAME}:latest
+                docker push hshs99/${DOCKER_IMAGE_NAME}:latest
                 '''
             }
             // Docker 단계가 끝나자마자 바로 삭제를 실행 (원하셨던 위치)
