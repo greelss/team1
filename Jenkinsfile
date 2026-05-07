@@ -11,15 +11,14 @@ pipeline {
         DOCKERHUB_CRED = credentials('hshs99')
         DOCKER_API_VERSION = '1.43'
         COMPOSE_API_VERSION = '1.43'
-        // S3를 위한 변수 (필요시 추가)
-        // REGION = "ap-northeast-2"
+         // REGION = "ap-northeast-2"
         // AWS_CREDENTIAL_NAME = "aws-credentials-id"
     }
 
     stages {
         stage('Git Clone') {
             steps {
-                git url: 'https://github.com/greelss/spring-petclinic.git', branch: 'main'
+                git url: 'https://github.com/sjh4616/spring-petclinic.git', branch: 'main'
             }
         }
 
@@ -38,17 +37,30 @@ pipeline {
                 docker push hshs99/${DOCKER_IMAGE_NAME}:latest
                 '''
             }
-            // Docker 단계가 끝나자마자 바로 삭제를 실행 (원하셨던 위치)
             post {
                 always {
                     sh '''
                     docker rmi -f ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER} || true
-                    docker rmi -f greelss/${DOCKER_IMAGE_NAME}:latest || true
+                    docker rmi -f hshs99/${DOCKER_IMAGE_NAME}:latest || true
                     '''
                 }
             }
         }
 
+        stage('K8s Deploy') {
+            steps {
+                sshPublisher(publishers: [
+                    sshPublisherDesc(configName: 'target', transfers: [
+                        sshTransfer(execCommand: '''
+                            # Deployment 이름이 was-deployment인지 꼭 확인하세요!
+                            kubectl rollout restart deployment/was-deployment
+                        ''')
+                    ])
+                ])
+            }
+        }
+    } // stages 종료
+} // pipeline 종료
         // stage('Upload s3') {
         //     steps {
         //         echo "Upload to S3"
