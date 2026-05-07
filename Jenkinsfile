@@ -52,8 +52,9 @@ pipeline {
                 sshPublisher(publishers: [
                     sshPublisherDesc(configName: 'target', transfers: [
                         sshTransfer(execCommand: '''
-                            # Deployment 이름이 was-deployment인지 꼭 확인하세요!
-                            kubectl rollout restart deployment/was-deployment
+                        export KUBECONFIG=$HOME/.kube/config
+                        kubectl set image deployment/spring-petclinic spring-petclinic=hshs99/spring-petclinic:latest
+                        kubectl rollout status deployment/spring-petclinic
                         ''')
                     ])
                 ])
