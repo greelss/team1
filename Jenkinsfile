@@ -30,19 +30,20 @@ pipeline {
 
         stage('Docker Build && Push') {
             steps {
-                sh '''
-                docker build -t ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER} .
-                docker tag ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER} hshs99/${DOCKER_IMAGE_NAME}:latest
-                echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin
-                docker push hshs99/${DOCKER_IMAGE_NAME}:latest
-                '''
+                sh """
+                    docker build -t hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} .
+                    docker tag hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} hshs99/${DOCKER_IMAGE_NAME}:latest
+                    echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin
+                    docker push hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}
+                    docker push hshs99/${DOCKER_IMAGE_NAME}:latest
+                """
             }
             post {
                 always {
-                    sh '''
-                    docker rmi -f ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER} || true
-                    docker rmi -f hshs99/${DOCKER_IMAGE_NAME}:latest || true
-                    '''
+                    sh """
+                        docker rmi -f hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} || true
+                        docker rmi -f hshs99/${DOCKER_IMAGE_NAME}:latest || true
+                    """
                 }
             }
         }
@@ -53,7 +54,7 @@ pipeline {
                     sshPublisherDesc(configName: 'target', transfers: [
                         sshTransfer(execCommand: """
                             export KUBECONFIG=/home/k8s-master/.kube/config
-                            kubectl set image deployment/team1-deployment spring-petclinic=hshs99/spring-petclinic:latest
+                            kubectl set image deployment/team1-deployment spring-petclinic=hshs99/spring-petclinic:v${env.BUILD_NUMBER}
                             kubectl rollout status deployment/team1-deployment
                         """)
                     ])
