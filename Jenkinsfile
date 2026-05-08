@@ -23,6 +23,7 @@ pipeline {
 
         stage('Maven Build') {
             steps {
+                sh 'rm -rf target'
                 sh 'mvn clean package -DskipTests'
             }
         }
