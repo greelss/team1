@@ -10,6 +10,8 @@ pipeline {
     environment {
         DOCKER_IMAGE_NAME = "spring-petclinic"
         DOCKERHUB_CRED = credentials('hshs99')
+        DOCKER_API_VERSION = '1.43' 
+}
     }
 
     stages {
