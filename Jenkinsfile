@@ -12,7 +12,7 @@ pipeline {
         DOCKERHUB_CRED = credentials('hshs99')
         DOCKER_API_VERSION = '1.43' 
 }
-    }
+
 
     stages {
         stage('Git Clone') {
