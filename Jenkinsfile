@@ -34,13 +34,17 @@ pipeline {
                         sh """
                             docker build -t hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} .
                             docker tag hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} hshs99/${DOCKER_IMAGE_NAME}:latest
-                            echo "${PASS}" | docker login -u "${USER}" --password-stdin
+                            
+                            # --password-stdin 대신 아래 구문으로 교체하세요.
+                            docker login -u "${USER}" -p "${PASS}"
+                            
                             docker push hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}
                             docker push hshs99/${DOCKER_IMAGE_NAME}:latest
                         """
                     }
                 }
             }
+        
             post {
                 always {
                     sh """
