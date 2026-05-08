@@ -4,15 +4,12 @@ pipeline {
     tools {
         jdk 'JDK21'
         maven 'M3'
+        dockerTool 'docker' 
     }
 
     environment {
         DOCKER_IMAGE_NAME = "spring-petclinic"
         DOCKERHUB_CRED = credentials('hshs99')
-        DOCKER_API_VERSION = '1.43'
-        COMPOSE_API_VERSION = '1.43'
-         // REGION = "ap-northeast-2"
-        // AWS_CREDENTIAL_NAME = "aws-credentials-id"
     }
 
     stages {
@@ -30,13 +27,15 @@ pipeline {
 
         stage('Docker Build && Push') {
             steps {
-                sh """
-                    docker build -t hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} .
-                    docker tag hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} hshs99/${DOCKER_IMAGE_NAME}:latest
-                    echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin
-                    docker push hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}
-                    docker push hshs99/${DOCKER_IMAGE_NAME}:latest
-                """
+                script {
+                    sh """
+                        docker build -t hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} .
+                        docker tag hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} hshs99/${DOCKER_IMAGE_NAME}:latest
+                        echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin
+                        docker push hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}
+                        docker push hshs99/${DOCKER_IMAGE_NAME}:latest
+                    """
+                }
             }
             post {
                 always {
@@ -54,15 +53,15 @@ pipeline {
                     sshPublisherDesc(configName: 'target', transfers: [
                         sshTransfer(execCommand: """
                             export KUBECONFIG=/home/k8s-master/.kube/config
-                            kubectl set image deployment/team1-deployment spring-petclinic=hshs99/spring-petclinic:v${env.BUILD_NUMBER}
+                            kubectl set image deployment/team1-deployment spring-petclinic=hshs99/spring-petclinic:${env.BUILD_NUMBER}
                             kubectl rollout status deployment/team1-deployment
                         """)
                     ])
                 ])
             }
         }
-    } // stages 종료
-} // pipeline 종료
+    }
+}
         // stage('Upload s3') {
         //     steps {
         //         echo "Upload to S3"
