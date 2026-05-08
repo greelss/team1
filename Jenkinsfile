@@ -30,13 +30,15 @@ pipeline {
         stage('Docker Build && Push') {
             steps {
                 script {
-                    sh """
-                        docker build -t hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} .
-                        docker tag hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} hshs99/${DOCKER_IMAGE_NAME}:latest
-                        echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin
-                        docker push hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}
-                        docker push hshs99/${DOCKER_IMAGE_NAME}:latest
-                    """
+                    withCredentials([usernamePassword(credentialsId: 'hshs99', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                        sh """
+                            docker build -t hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} .
+                            docker tag hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} hshs99/${DOCKER_IMAGE_NAME}:latest
+                            echo "${PASS}" | docker login -u "${USER}" --password-stdin
+                            docker push hshs99/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}
+                            docker push hshs99/${DOCKER_IMAGE_NAME}:latest
+                        """
+                    }
                 }
             }
             post {
